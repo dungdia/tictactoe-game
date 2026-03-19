@@ -96,6 +96,7 @@
 
         let board = ["", "", "", "", "", "", "", "", ""];
         let gameActive = true;
+        let isAITurn = false;
         const HUMAN = "X";
         const AI = "O";
 
@@ -107,10 +108,11 @@
 
         function handleCellClick(e) {
             const index = e.target.getAttribute('data-index');
-            if (board[index] !== "" || !gameActive) return;
+            if (board[index] !== "" || !gameActive || isAITurn) return;
 
             makeMove(index, HUMAN);
             if (gameActive) {
+                isAITurn = true;
                 statusElement.innerText = "AI is thinking...";
                 setTimeout(aiMove, 500);
             }
@@ -139,24 +141,31 @@
             if (roundWon) {
                 statusElement.innerText = winner === HUMAN ? "You Win!" : "AI Wins!";
                 gameActive = false;
+                isAITurn = false;
                 return;
             }
 
             if (!board.includes("")) {
                 statusElement.innerText = "Draw!";
                 gameActive = false;
+                isAITurn = false;
                 return;
             }
 
             if (gameActive) {
-                statusElement.innerText = board.filter(x => x!=="").length % 2 === 0 ? "Your Turn (X)" : "AI's Turn (O)";
+                const nextPlayer = board.filter(x => x!=="").length % 2 === 0 ? HUMAN : AI;
+                statusElement.innerText = nextPlayer === HUMAN ? "Your Turn (X)" : "AI's Turn (O)";
             }
         }
 
         function aiMove() {
-            if (!gameActive) return;
+            if (!gameActive) {
+                isAITurn = false;
+                return;
+            }
             const bestMove = minimax(board, AI).index;
             makeMove(bestMove, AI);
+            isAITurn = false;
         }
 
         function minimax(newBoard, player) {
